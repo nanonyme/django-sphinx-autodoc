@@ -2,6 +2,11 @@
 Django-Sphinx-autodoc
 =====================
 
+.. warning:: 
+    **This fork has code which is edited to allow you to generate the autodocs as 
+    Sphinx builds your docs however it is not yet fully working! 
+    Furthermore, running this code from conf.py might not be the correct approach
+    with regard to sphinx**
 
 Django is very nice in that way you can reuse a lot of applications in your
 projects. It means for big projects that you'll get a long list of applications
