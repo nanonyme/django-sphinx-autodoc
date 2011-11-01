@@ -18,22 +18,30 @@ try:
 except ImportError:
     raise ImportError("The script should be run from the project root")
 
+CONFIG = {
+    'PROJECT_ROOT': HERE,
+    'DOCS_ROOT': os.path.join(HERE, "doc"),
+    'MASTER_DOC': "index.rst",
+    'FILENAME': "auto_modules",
+    'EXCLUDED_APPS': [],
+    'EXCLUDED_MODULES': ["__init__.py", ],
+}
 
 class Modules(object):
     """
     auto_modules.rst file to store all the apps automodules
     """
 
-    def __init__(self):
+    def __init__(self, config=CONFIG):
         self.internal_apps = []
         self.external_apps = []
-        self.fname = settings.DS_FILENAME
+        self.fname = config['FILENAME']
 
     def write(self):
         """Write the created list in the new file"""
         f = open("%s.rst" % self.fname, "w+")
         title = "Internal Applications"
-        symbol_line = "=" * len(name)
+        symbol_line = "=" * len(title)
         l_file = self.add_lf([symbol_line, title, symbol_line, "", ""])
         l_file.extend(self.internal_apps)
         title = "External Applications"
@@ -48,7 +56,7 @@ class Modules(object):
         Verify that a "auto_modules" file is in the toctree, and append it
         otherwise
         """
-        re_m = re.compile(settings.DS_FILENAME)
+        re_m = re.compile(self.fname)
         self.in_index = re_m.findall("".join(toctree)) and True or False
         # Now that we know the title, append it at the beginning of the file
 
@@ -95,11 +103,13 @@ class Modules(object):
 class App(object):
     """Application with its name and the list of python files it contains"""
 
-    def __init__(self, name):
+    def __init__(self, name, config=CONFIG):
         self.name = name
-        self.is_internal = self.name in os.listdir(HERE)
+        self.is_internal = self.name in os.listdir(config['PROJECT_ROOT'])
+        self.excluded_modules = config['EXCLUDED_MODULES']
         self.path = self.get_path()
         self.modules = self.get_modules()
+        
 
     def get_path(self):
         """return absolute path for this application"""
@@ -121,7 +131,7 @@ class App(object):
         os.chdir(self.path)
 
         modules = [f.split(".py")[0] for f in os.listdir(".") if f not
-                   in settings.DS_EXCLUDED_MODULES and f.endswith(".py")]
+                   in self.excluded_modules and f.endswith(".py")]
         # Remove all irrelevant modules. A module is relevant if he
         # contains a function or class
         not_relevant = []
@@ -147,32 +157,24 @@ class App(object):
         return False
 
 
-def generate_autodocs():
-    # Define some variables
-    settings.DS_ROOT = getattr(settings, "DS_ROOT", os.path.join(HERE, "doc"))
-    settings.DS_MASTER_DOC = getattr(settings, "DS_MASTER_DOC", "index.rst")
-    settings.DS_FILENAME = getattr(settings, "DS_FILENAME", "auto_modules")
-    settings.DS_EXCLUDED_APPS = getattr(settings, "DS_EXCLUDED_APPS", [])
-    settings.DS_EXCLUDED_MODULES = getattr(settings, "DS_EXCLUDED_MODULES",
-        ["__init__.py", ])
-
+def generate_autodocs(config=CONFIG):
     # Create a file for new modules
     f_modules = Modules()
     # Write all the apps autodoc in the newly created file
-    l_apps = set(settings.INSTALLED_APPS) - set(settings.DS_EXCLUDED_APPS)
+    l_apps = set(settings.INSTALLED_APPS) - set(config['EXCLUDED_APPS'])
     [f_modules.add_app(App(name)) for name in l_apps]
 
     # Go to the doc directory and open the index
-    os.chdir(settings.DS_ROOT)
+    os.chdir(config['DOCS_ROOT'])
     try:
-        f_index = open(settings.DS_MASTER_DOC, "r")
+        f_index = open(config['MASTER_DOC'], "r")
         l_index = f_index.readlines()
         # Set the file name for modules
         f_modules.add_to_toctree(l_index)
         f_index.close()
     except IOError:
         raise IOError("No file %s/%s exists, please fix it" %
-             (settings.DS_ROOT, settings.DS_MASTER_DOC))
+             (config['DOCS_ROOT'], config['MASTER_DOC']))
 
     # Write the modules file
     f_modules.write()
@@ -183,9 +185,14 @@ def generate_autodocs():
             if ":maxdepth: 2" in line:
                 l_index.insert(i + 2, "    %s\n" % f_modules.fname)
                 break
-    f_index = open(settings.DS_MASTER_DOC, "w")
+    f_index = open(config['MASTER_DOC'], "w")
     f_index.writelines(l_index)
     f_index.close()
 
 if __name__ == '__main__':
-    generate_autodocs()
+    DJANGO_AUTODOC_SETTINGS = getattr(settings, "DJANGO_AUTODOC_SETTINGS", {})
+    # Update the values to pass for this instance
+    for key in DJANGO_AUTODOC_SETTINGS:
+        CONFIG[key] = DJANGO_AUTODOC_SETTINGS[key]
+        
+    generate_autodocs(CONFIG)
