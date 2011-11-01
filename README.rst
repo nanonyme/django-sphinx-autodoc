@@ -109,8 +109,8 @@ Remember to include a link in your TOC somewhere to this file.  For example, in 
 
 .. parsed-literal::
 
-API/Reference Docs
-------------------
+    API/Reference Docs
+    ------------------
 
     .. toctree::
        :maxdepth: 2
