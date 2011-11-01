@@ -147,7 +147,7 @@ class App(object):
         return False
 
 
-if __name__ == '__main__':
+def generate_autodocs():
     # Define some variables
     settings.DS_ROOT = getattr(settings, "DS_ROOT", os.path.join(HERE, "doc"))
     settings.DS_MASTER_DOC = getattr(settings, "DS_MASTER_DOC", "index.rst")
@@ -186,3 +186,6 @@ if __name__ == '__main__':
     f_index = open(settings.DS_MASTER_DOC, "w")
     f_index.writelines(l_index)
     f_index.close()
+
+if __name__ == '__main__':
+    generate_autodocs()
