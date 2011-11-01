@@ -2,6 +2,11 @@
 Django-Sphinx-autodoc
 =====================
 
+.. warning:: 
+    **This fork has code which is edited to allow you to generate the autodocs as 
+    Sphinx builds your docs however it is not yet fully working! 
+    Furthermore, running this code from conf.py might not be the correct approach
+    with regard to sphinx**
 
 Django is very nice in that way you can reuse a lot of applications in your
 projects. It means for big projects that you'll get a long list of applications
@@ -65,8 +70,8 @@ file living at your project root directory, you can use it in the following way.
 Install this module via PIP or have it somewhere on your Python Path.
 
 In you Sphinx conf.py file, usually found in the docs/ directory, add:
-
 ::
+
     # Link into generate autodocs via Django-Sphinx-Autodoc
     try:
         import generate_autodoc
@@ -107,10 +112,10 @@ generated.
 
 Remember to include a link in your TOC somewhere to this file.  For example, in this case I have
 
-.. parse-literal::
+.. parsed-literal::
 
-API/Reference Docs
-------------------
+    API/Reference Docs
+    ------------------
 
     .. toctree::
        :maxdepth: 2
