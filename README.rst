@@ -7,6 +7,8 @@ Django-Sphinx-autodoc
     Sphinx builds your docs however it is not yet fully working! 
     Furthermore, running this code from conf.py might not be the correct approach
     with regard to sphinx**
+    
+    It is currently working as described in the last section of this readme.
 
 Django is very nice in that way you can reuse a lot of applications in your
 projects. It means for big projects that you'll get a long list of applications
@@ -86,7 +88,7 @@ In you Sphinx conf.py file, usually found in the docs/ directory, add:
         'PROJECT_ROOT': PROJECT_DIR,
         'DOCS_ROOT': project_dir('docs'),
         'MASTER_DOC': "index.rst",
-        'FILENAME': "api/ref.rst",
+        'FILENAME': "api/ref",
         'EXCLUDED_APPS': [
             'grappelli.dashboard',
             'grappelli',
@@ -96,16 +98,10 @@ In you Sphinx conf.py file, usually found in the docs/ directory, add:
             'django.contrib.auth',
             'django.contrib.contenttypes',
             'django.contrib.databrowse',
-            'django.contrib.messages',
-            'django.contrib.sessions',
-            'django.contrib.sites',
-            'django.contrib.staticfiles',
-            'south',
         ],
         'EXCLUDED_MODULES': ["__init__.py", ],
     }
     generate_autodoc.generate_autodocs(DJANGO_AUTODOC_SETTINGS)
-
 
 Now, when you run ``make HTML`` as the conf.py file is parsed by Sphinx, the docs will be 
 generated.
@@ -122,4 +118,4 @@ Remember to include a link in your TOC somewhere to this file.  For example, in 
        api/ref
 
 
-   
+.. note:: The modified way I have set settings to be specified.  This fork uses a dictionary.   
