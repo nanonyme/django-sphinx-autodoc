@@ -55,3 +55,66 @@ TODO
 - Write tests
 - improve the not_relevant stuff to auto exclude a file without class or def
 - Django command extension to update the autodoc
+
+ADDED SPECIAL CASE FUNCTIONALITY
+--------------------------------
+
+If you want to generated the docs automatically and do not want to have to have this 
+file living at your project root directory, you can use it in the following way.
+
+Install this module via PIP or have it somewhere on your Python Path.
+
+In you Sphinx conf.py file, usually found in the docs/ directory, add:
+
+::
+    # Link into generate autodocs via Django-Sphinx-Autodoc
+    try:
+        import generate_autodoc
+    except ImportError:
+        print ("There was an issue importing the Autodoc function module.")
+    
+    PROJECT_DIR = os.path.abspath( os.path.join(os.path.dirname(__file__), "..") )
+    PROJECT_DIRNAME = PROJECT_DIR.split('/')[-1]
+    project_dir = lambda p: os.path.abspath( os.path.join(PROJECT_DIR, p) )
+
+    DJANGO_AUTODOC_SETTINGS = {
+        'PROJECT_ROOT': PROJECT_DIR,
+        'DOCS_ROOT': project_dir('docs'),
+        'MASTER_DOC': "index.rst",
+        'FILENAME': "api/ref.rst",
+        'EXCLUDED_APPS': [
+            'grappelli.dashboard',
+            'grappelli',
+            'filebrowser',
+            'django.contrib.admin',
+            'django.contrib.admindocs',
+            'django.contrib.auth',
+            'django.contrib.contenttypes',
+            'django.contrib.databrowse',
+            'django.contrib.messages',
+            'django.contrib.sessions',
+            'django.contrib.sites',
+            'django.contrib.staticfiles',
+            'south',
+        ],
+        'EXCLUDED_MODULES': ["__init__.py", ],
+    }
+    generate_autodoc.generate_autodocs(DJANGO_AUTODOC_SETTINGS)
+
+
+Now, when you run ``make HTML`` as the conf.py file is parsed by Sphinx, the docs will be 
+generated.
+
+Remember to include a link in your TOC somewhere to this file.  For example, in this case I have
+
+.. parse-literal::
+
+API/Reference Docs
+------------------
+
+    .. toctree::
+       :maxdepth: 2
+       api/ref
+
+
+   
