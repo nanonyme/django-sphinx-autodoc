@@ -65,8 +65,8 @@ file living at your project root directory, you can use it in the following way.
 Install this module via PIP or have it somewhere on your Python Path.
 
 In you Sphinx conf.py file, usually found in the docs/ directory, add:
-
 ::
+
     # Link into generate autodocs via Django-Sphinx-Autodoc
     try:
         import generate_autodoc
@@ -107,7 +107,7 @@ generated.
 
 Remember to include a link in your TOC somewhere to this file.  For example, in this case I have
 
-.. parse-literal::
+.. parsed-literal::
 
 API/Reference Docs
 ------------------
