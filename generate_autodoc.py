@@ -6,33 +6,12 @@
 import os
 import re
 
-HERE = os.path.realpath(os.path.dirname(__file__))
-
-# from project
-try:
-    # Get the list of applications from the settings
-    import settings
-    from django.core.management import setup_environ
-    setup_environ(settings)  # some apps will fail to load without some
-                             # specific settings
-except ImportError:
-    raise ImportError("The script should be run from the project root")
-
-CONFIG = {
-    'PROJECT_ROOT': HERE,
-    'DOCS_ROOT': os.path.join(HERE, "doc"),
-    'MASTER_DOC': "index.rst",
-    'FILENAME': "auto_modules",
-    'EXCLUDED_APPS': [],
-    'EXCLUDED_MODULES': ["__init__.py", ],
-}
-
 class Modules(object):
     """
     auto_modules.rst file to store all the apps automodules
     """
 
-    def __init__(self, config=CONFIG):
+    def __init__(self, config):
         self.internal_apps = []
         self.external_apps = []
         self.fname = config['FILENAME']
@@ -103,7 +82,7 @@ class Modules(object):
 class App(object):
     """Application with its name and the list of python files it contains"""
 
-    def __init__(self, name, config=CONFIG):
+    def __init__(self, name, config):
         self.name = name
         self.is_internal = self.name in os.listdir(config['PROJECT_ROOT'])
         self.excluded_modules = config['EXCLUDED_MODULES']
@@ -157,12 +136,12 @@ class App(object):
         return False
 
 
-def generate_autodocs(config=CONFIG):
+def generate_autodocs(config):
     # Create a file for new modules
-    f_modules = Modules()
+    f_modules = Modules(config)
     # Write all the apps autodoc in the newly created file
-    l_apps = set(settings.INSTALLED_APPS) - set(config['EXCLUDED_APPS'])
-    [f_modules.add_app(App(name)) for name in l_apps]
+    l_apps = set(config['INSTALLED_APPS']) - set(config['EXCLUDED_APPS'])
+    [f_modules.add_app(App(name, config)) for name in l_apps]
 
     # Go to the doc directory and open the index
     os.chdir(config['DOCS_ROOT'])
@@ -190,6 +169,30 @@ def generate_autodocs(config=CONFIG):
     f_index.close()
 
 if __name__ == '__main__':
+    
+    HERE = os.path.realpath(os.path.dirname(__file__))
+
+    # from project
+    try:
+        # Get the list of applications from the settings
+        import settings
+        from django.core.management import setup_environ
+        setup_environ(settings)  # some apps will fail to load without some
+                                 # specific settings
+    except ImportError:
+        raise ImportError("The script should be run from the project root")
+
+    CONFIG = {
+        'PROJECT_ROOT': HERE,
+        'DOCS_ROOT': os.path.join(HERE, "doc"),
+        'MASTER_DOC': "index.rst",
+        'FILENAME': "auto_modules",
+        'INSTALLED_APPS': settings.INSTALLED_APPS,
+        'EXCLUDED_APPS': [],
+        'EXCLUDED_MODULES': ["__init__.py", ],
+    }
+    
+    
     DJANGO_AUTODOC_SETTINGS = getattr(settings, "DJANGO_AUTODOC_SETTINGS", {})
     # Update the values to pass for this instance
     for key in DJANGO_AUTODOC_SETTINGS:
