@@ -6,6 +6,12 @@ from __future__ import with_statement
 import os
 import re
 
+
+def add_lf(line_list):
+    """Append line feed \n to all elements of the given list"""
+    return ["%s\n" % line for line in line_list]
+
+
 class Modules(object):
     """
     auto_modules.rst file to store all the apps automodules
@@ -15,20 +21,21 @@ class Modules(object):
         self.internal_apps = []
         self.external_apps = []
         self.fname = config['FILENAME']
+        self.in_index = None
 
     def write(self):
         """Write the created list in the new file"""
-        with open("%s.rst" % self.fname, "w+") as f:
+        with open("%s.rst" % self.fname, "w+") as output_file:
             title = "Internal Applications"
             symbol_line = "=" * len(title)
-            l_file = self.add_lf([symbol_line, title, symbol_line, "", ""])
+            l_file = add_lf([symbol_line, title, symbol_line, "", ""])
             l_file.extend(self.internal_apps)
             title = "External Applications"
-            external_title = self.add_lf([symbol_line, title,
-                                          symbol_line, "", ""])
+            external_title = add_lf([symbol_line, title,
+                                     symbol_line, "", ""])
             l_file.extend(external_title)
             l_file.extend(self.external_apps)
-            f.writelines(l_file)
+            output_file.writelines(l_file)
 
     def add_to_toctree(self, toctree):
         """
@@ -39,21 +46,18 @@ class Modules(object):
         self.in_index = re_m.findall("".join(toctree)) and True or False
         # Now that we know the title, append it at the beginning of the file
 
-    def add_lf(self, l):
-        """Append line feed \n to all elements of the given list"""
-        return ["%s\n" % line for line in l]
-
     def add_app(self, app):
         """template of application autodoc"""
 
         if not app.path:
             # App couldn't be documented
-            #template += ".. error:: This app couldn't be documented\n\n"
-# TODO Most themes doesn't style error, need to custom it
-            template = ".. warning:: '%s' couldn't be documented\n\n" % app.name  # NOQA
+            # template += ".. error:: This app couldn't be documented\n\n"
+            # TODO Most themes doesn't style error, need to custom it
+            template = ".. warning:: '%s' couldn't be documented\n\n"
+            template = template % app.name  # NOQA
         else:
             # Write the name of the application
-            template = self.add_lf([app.name, "=" * len(app.name), ""])
+            template = add_lf([app.name, "=" * len(app.name), ""])
 
             if app.has_description():
                 # Description of the application if it exists
@@ -63,7 +67,7 @@ class Modules(object):
 
             # Write an automodule for each of its modules
             for module in app.modules:
-                template += self.add_lf([
+                template += add_lf([
                     # title of the module
                     module, "-" * len(module), "",
                     # automodule
@@ -94,9 +98,9 @@ class App(object):
         """return absolute path for this application"""
         try:
             path = __import__(self.name).__path__[0]
-            splitedName = self.name.split(".")
-            if len(splitedName) > 1:
-                path = os.path.join(path, *splitedName[1:])
+            splited_name = self.name.split(".")
+            if len(splited_name) > 1:
+                path = os.path.join(path, *splited_name[1:])
             return path
         except ImportError:
             print "The application %s couldn't be autodocumented" % self.name
@@ -122,7 +126,8 @@ class App(object):
             if not relevant:
                 not_relevant.append(module)
                 print "%s.%s not relevant, removed" % (self.name, module)
-        [modules.remove(module) for module in not_relevant]
+        for module in not_relevant:
+            modules.remove(module)
         return modules
 
 
@@ -140,7 +145,8 @@ def generate_autodocs(config):
     f_modules = Modules(config)
     # Write all the apps autodoc in the newly created file
     l_apps = set(config['INSTALLED_APPS']) - set(config['EXCLUDED_APPS'])
-    [f_modules.add_app(App(name, config)) for name in l_apps]
+    for name in l_apps:
+        f_modules.add_app(App(name, config))
 
     # Go to the doc directory and open the index
     os.chdir(config['DOCS_ROOT'])
