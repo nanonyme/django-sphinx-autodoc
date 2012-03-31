@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""This program scrapes all your .py files in each application
+listed by INSTALLED_APP, then add automodules in your DS_ROOT/modules.rs
+"""
 from __future__ import with_statement
-
 #from python
 import os
 import re
@@ -141,6 +143,9 @@ class App(object):
 
 
 def generate_autodocs(config):
+    """Main entrypoint
+    :param config: dictionary that contains configurations
+    """
     # Create a file for new modules
     f_modules = Modules(config)
     # Write all the apps autodoc in the newly created file
