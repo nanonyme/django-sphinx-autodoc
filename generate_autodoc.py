@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-# -*- coding:Utf-8 -*-
-
+# -*- coding: utf-8 -*-
+from __future__ import with_statement
 
 #from python
 import os
@@ -18,17 +18,17 @@ class Modules(object):
 
     def write(self):
         """Write the created list in the new file"""
-        f = open("%s.rst" % self.fname, "w+")
-        title = "Internal Applications"
-        symbol_line = "=" * len(title)
-        l_file = self.add_lf([symbol_line, title, symbol_line, "", ""])
-        l_file.extend(self.internal_apps)
-        title = "External Applications"
-        external_title = self.add_lf([symbol_line, title, symbol_line, "", ""])
-        l_file.extend(external_title)
-        l_file.extend(self.external_apps)
-        f.writelines(l_file)
-        f.close()
+        with open("%s.rst" % self.fname, "w+") as f:
+            title = "Internal Applications"
+            symbol_line = "=" * len(title)
+            l_file = self.add_lf([symbol_line, title, symbol_line, "", ""])
+            l_file.extend(self.internal_apps)
+            title = "External Applications"
+            external_title = self.add_lf([symbol_line, title,
+                                          symbol_line, "", ""])
+            l_file.extend(external_title)
+            l_file.extend(self.external_apps)
+            f.writelines(l_file)
 
     def add_to_toctree(self, toctree):
         """
@@ -115,9 +115,8 @@ class App(object):
         # contains a function or class
         not_relevant = []
         for module in modules:
-            f_module = open("%s.py" % module, "r")
-            content = f_module.read()
-            f_module.close()
+            with open("%s.py" % module, "r") as f_module:
+                content = f_module.read()
             keywords = ["def", "class"]
             relevant = sum([value in content for value in keywords])
             if not relevant:
@@ -129,8 +128,8 @@ class App(object):
 
     def has_description(self):
         """Get the application docstring from __init__.py if it exists"""
-        f_init = open("%s/__init__.py" % self.path, "r")
-        content = f_init.read()
+        with open("%s/__init__.py" % self.path, "r") as f_init:
+            content = f_init.read()
         if '"""' in content or "'''" in content:
             return True
         return False
@@ -146,11 +145,10 @@ def generate_autodocs(config):
     # Go to the doc directory and open the index
     os.chdir(config['DOCS_ROOT'])
     try:
-        f_index = open(config['MASTER_DOC'], "r")
-        l_index = f_index.readlines()
-        # Set the file name for modules
-        f_modules.add_to_toctree(l_index)
-        f_index.close()
+        with open(config['MASTER_DOC'], "r") as f_index:
+            l_index = f_index.readlines()
+            # Set the file name for modules
+            f_modules.add_to_toctree(l_index)
     except IOError:
         raise IOError("No file %s/%s exists, please fix it" %
              (config['DOCS_ROOT'], config['MASTER_DOC']))
@@ -164,9 +162,8 @@ def generate_autodocs(config):
             if ":maxdepth: 2" in line:
                 l_index.insert(i + 2, "    %s\n" % f_modules.fname)
                 break
-    f_index = open(config['MASTER_DOC'], "w")
-    f_index.writelines(l_index)
-    f_index.close()
+    with open(config['MASTER_DOC'], "w") as f_index:
+        f_index.writelines(l_index)
 
 if __name__ == '__main__':
     
